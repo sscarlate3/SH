@@ -1,0 +1,353 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define FALSE 0
+#define TRUE 1
+#define ERR_INDICE_INVALIDO 2
+#define ERR_LISTA_VAZIA 3
+#define SUCESSO 4
+
+typedef struct No {
+    int item;
+    struct No *proximo;
+} No;
+
+/**
+ * Tipo Abstrato de Dado Lista
+ * Implementa uma lista encadeada de items
+ */ 
+typedef struct {
+    No *inicio;
+} Lista;
+
+/**
+ * Cria uma lista vazia.
+ * @return  Retona uma lista vazia.
+ *          Se retorno for NULL, memória insuficiente.  */
+Lista* criar_lista() 
+{
+    Lista *lista = (Lista *) malloc(sizeof(Lista));
+    lista->inicio = NULL;
+    return lista;
+    
+}
+
+/** Insere @code{item} no final de @code{lista}
+ *  @param lista Lista na qual será inserido o @code{item}.
+ *  @param item Item que será inserido em @code{lista}.
+ *  @return TRUE se @code{item} for inserido em @code{lista}.
+ *          FALSE se não houver memória. */
+int inserir(Lista *lista, int item) {
+    No *novo_no = (No*) malloc(sizeof(No));
+    novo_no->proximo = NULL;
+    novo_no->item = item;
+
+    if (novo_no == NULL) {
+        return FALSE;
+    }
+
+    if (lista->inicio == NULL) {
+        lista->inicio = novo_no;
+        return TRUE;
+    }
+
+    No *atual = lista->inicio;
+    while (atual->proximo != NULL){
+        atual = atual->proximo;
+    }
+
+    atual->proximo = novo_no;
+
+    return TRUE;
+}
+
+/** Insere @code{item} numa posição @code{pos} de @code{lista}
+ *  @param lista Lista na qual será inserido o @code{item}.
+ *  @param item Item que será inserido em @code{lista}.
+ *  @param pos  Posição na qual o @code{item} deverá ser inserido.
+ *  @return TRUE se @code{item} for inserido em @code{lista}
+ *          FALSE se não houver memória 
+ *          ERR_INDICE_INVALIDO se posição @code{pos} não é válida (@code{pos} < 0 || @code{pos} >= tamanho) */
+int inserir_posicao(Lista *lista, int item, int pos) {
+    No *novo_no = (No *) malloc(sizeof(No));
+    novo_no->item = item;
+
+    if (lista->inicio == NULL) {
+        if (pos == 0) {
+            lista->inicio = novo_no;
+            return TRUE;
+        }
+
+        return ERR_INDICE_INVALIDO;
+
+    }
+
+    if (pos == 0) {
+        novo_no->proximo = lista->inicio;
+        lista->inicio = novo_no;
+        return TRUE;
+    }
+
+    No *atual = lista->inicio;
+    for (int i = 0; i < pos-1; i++) {
+        atual = atual->proximo;
+
+        if (atual == NULL) {
+            return ERR_INDICE_INVALIDO;
+        }
+    }
+
+    novo_no->proximo = atual->proximo;
+    atual->proximo = novo_no;
+    return TRUE;
+}
+
+/** Remove um @code{item} no inicio de @code{lista}
+ *  @param lista Lista na qual será removio um @code{item}.
+ *  @param err  Código de erro.
+ *              FALSE caso não ocorre nenhum erro.
+ *              ERR_LISTA_VAZIA se não existem itens em @code{lista}.
+ *  @return se @code{err} é FALSE, @code{item} de @code{lista} na posição 0 (zero).
+ *          ERR_LISTA_VAZIA se não existem itens em @code{lista}. */
+int remover(Lista *lista, int *err){
+    if (lista->inicio == NULL){
+        *err = ERR_LISTA_VAZIA;
+        return ERR_LISTA_VAZIA;
+    }
+
+    int item = lista->inicio->item;
+    No *atual = lista->inicio;
+
+    lista->inicio = lista->inicio->proximo;
+    free(atual);
+    *err = FALSE;
+    return item;
+}
+
+/** Remove um @code{item} na posição @code{pos} de @code{lista}
+ *  @param lista Lista na qual será removio um @code{item}.
+ *  @param pos  Posição na qual será retirado o @code{item}.
+ *  @param err  Código de erro.
+ *              FALSE caso não ocorre nenhum erro.
+ *              ERR_LISTA_VAZIA se não existem itens em @code{lista}.
+ *  @return se @code{err} é FALSE, @code{item} de @code{lista} na posição @code{pos}.
+ *          ERR_INDICE_INVALIDO se posição @code{pos} não é válida (@code{pos} < 0 || @code{pos} >= tamanho) */
+int remover_posicao(Lista *lista, int pos, int *err) {
+    if (lista->inicio == NULL) {
+        *err = ERR_LISTA_VAZIA;
+        return ERR_LISTA_VAZIA;
+    }
+
+    No *backup;
+    int item;
+
+    if (pos == 0) {
+        backup = lista->inicio;
+        item = backup->item;
+        lista->inicio = lista->inicio->proximo;
+        free(backup);
+
+        *err = FALSE;
+        return item;
+    }
+
+    No *atual = lista->inicio;
+    for (int i = 0; i<pos-1; i++) {
+        atual = atual->proximo;
+        if (atual == NULL || atual->proximo == NULL) {
+            return ERR_INDICE_INVALIDO;
+        }
+    }
+
+    backup = atual->proximo;
+    item = backup->item;
+
+    atual->proximo = atual->proximo->proximo;
+
+    free(backup);
+
+    *err = FALSE;
+    return item;
+
+}
+
+/** Recupera de @code{lista} o @code{item} na posição @code{pos}
+ *  @param lista Lista que contém o @code{item}.
+ *  @param pos  Posição na qual está o @code{item}.
+ *  @param err  Código de erro.
+ *              FALSE caso não ocorre nenhum erro
+ *              ERR_INDICE_INVALIDO se posição @code{pos} não é válida (@code{pos} < 0 || @code{pos} >= tamanho)
+ *  @return se @code{err} == FALSE, valor de @code{lista} na posição @code{pos}
+ *          caso contrário, TRUE indicando que houve erro. */
+int obter_item(Lista *lista, int pos, int *err) {
+    if (lista->inicio == NULL) {
+        *err = ERR_INDICE_INVALIDO;
+        return ERR_INDICE_INVALIDO;
+    }
+
+    No *atual = lista->inicio;
+    for(int i = 0; i< pos; i++){
+        atual = atual->proximo;
+        if (atual == NULL) {
+            *err = ERR_INDICE_INVALIDO;
+            return ERR_INDICE_INVALIDO;
+        }
+    }
+
+    *err = FALSE;
+    return atual->item;
+}
+
+/** Atribui novo @code{item} à posição @code{pos} de @code{lista}
+ *  @param lista Lista que contém os items.
+ *  @param pos  Posição na qual será atribuído o @code{item}.
+ *  @param item Novo item que sera atribuído a @code{lista}
+ *  @param err  Código de erro.
+ *              FALSE caso não ocorre nenhum erro.
+ *              ERR_INDICE_INVALIDO se posição @code{pos} não é válida (@code{pos} < 0 || @code{pos} >= tamanho)
+ *  @return FALSE se não for possível atribuir @code{item} em @code{lista} na posição @code{pos}.
+ *          TRUE se for possível. */
+int atribuir_valor(Lista *lista, int pos, int item, int *err) {
+    if (lista->inicio == NULL) {
+        *err = ERR_INDICE_INVALIDO;
+        return ERR_INDICE_INVALIDO;
+    }
+
+    No *atual = lista->inicio;
+    for (int i = 0 ; i<pos; i++) {
+        atual = atual->proximo;
+        if (atual == NULL) {
+            *err = ERR_INDICE_INVALIDO;
+            return ERR_INDICE_INVALIDO;
+        }
+    }
+
+    atual->item = item;
+    *err = FALSE;
+    
+    return FALSE;
+}
+
+/** Indica se @code{lista} possui ou não itens.
+ *  @param lista Lista na qual se verificará estar vazia ou não.
+
+ *  @return TRUE se @code{lista} é NULL ou se tamanho é igual a 0 (zero).
+ *          FALSE se tamanho > 0 (zero). */
+int estah_vazia(Lista *lista) {
+    if (lista->inicio == NULL) {
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+/** Recupera número de itens de @code{lista}.
+ *  @param lista Lista que se quer saber o tamanho.
+ *  @return Número de itens mantidos na  @code{lista}.*/
+int tamanho(Lista *lista) {
+    if (lista->inicio == NULL) {
+        return 0;
+    }
+
+    int tam = 1;
+    No *atual = lista->inicio;
+    while(atual->proximo != NULL) {
+        tam++;
+        atual = atual->proximo;
+    }
+
+    return tam;
+}
+
+/************************************************************************************/
+
+void imprimir_lista(Lista *lista) {
+    No *atual = lista->inicio;
+    if (atual == NULL){
+        return;
+    }
+    while(atual != NULL) {
+        printf("%d\n", atual->item);
+        atual = atual->proximo;
+    }
+}
+
+int main()
+{
+    Lista *lista = criar_lista();
+
+    char token[3];
+    int valor, posicao, result, erro;
+
+    scanf("%s", token);
+
+    while (token[0] != 'Q') {
+        if (strcmp(token, "AF") == 0) {      // adicionar no fim
+            scanf(" %d", &valor);
+            inserir(lista, valor);
+        }
+        else if (strcmp(token, "AP") == 0) { // adicionar numa posição
+            scanf(" %d", &posicao);
+            scanf(" %d", &valor);
+            result = inserir_posicao(lista, valor, posicao);
+
+            switch(result) {
+                case FALSE:
+                    printf("NenhumItemException\n");
+                    break;
+                case ERR_INDICE_INVALIDO:
+                    printf("PosicaoInvalidaException\n");
+                    break;
+            }                
+        }
+        else if (strcmp(token, "RI") == 0) { // remover no início
+            valor = remover(lista, &erro);
+            switch(erro) {
+                case ERR_LISTA_VAZIA:
+                    printf("NenhumItemException\n");
+                    break;
+                case ERR_INDICE_INVALIDO:
+                    printf("PosicaoInvalidaException\n");
+                    break;
+            }
+        }
+        else if (strcmp(token, "RP") == 0) { // remover numa posição
+            scanf(" %d", &posicao);
+            remover_posicao(lista, posicao, &erro);
+            if (erro == ERR_INDICE_INVALIDO)
+                printf("PosicaoInvalidaException\n");                
+        }
+        else if (token[0] == 'S') {  // setar valor numa posição
+            scanf(" %d", &posicao);
+            scanf(" %d", &valor);
+            atribuir_valor(lista, posicao, valor, &erro);
+            if (erro == ERR_INDICE_INVALIDO)
+                printf("PosicaoInvalidaException\n");    
+        }        
+        else if (token[0] == 'G') {  // obter valor numa posição
+            scanf(" %d", &posicao);
+            obter_item(lista, posicao, &erro);
+            if (erro == ERR_INDICE_INVALIDO)
+            printf("PosicaoInvalidaException\n");
+        }
+        else if (token[0] == 'T') {  // tamanho da lista
+            printf("%d\n", tamanho(lista));
+        }
+        else if (token[0] == 'V') {   // lista está vazia
+            if (estah_vazia(lista))
+                printf("true\n");
+            else
+                printf("false\n");
+        }
+        else if (token[0] == 'P')    // imprimir lista
+            imprimir_lista(lista);
+        else
+            printf("ERRO %s\n", token);
+
+        fflush(stdin);
+        scanf("%s", token);
+    }
+
+    return 0;
+}
