@@ -1,0 +1,10 @@
+npc 2: Viajante novo? Tente nao morrer por aqui, meu nome é {}, é melhor ir para casa antes que você morra... ou eu te mate
+padre 3:  OH faz tempo que nao vejo caras novas por aqui filho, afinal, todos passam fome nessa cidade... não seria inesperado se descobrissem que ...
+hehe... esqueça, tenha um bom dia.
+npc 3: Vo.. você veio matar o demonio!?!?
+
+npc 1: Ah, ora ora, você ... percebeu que já estou mais sóbrio?! hehehe... oque voce disse? voce quer saber mais sobre essa cidade? Bom, você entendera quando o padre abrir a boca... literalmente, se ele ja tivesse feito isso até com as formigas, não me impressionaria.
+npc 2: AHR ! VOCÊ DENOVO? OQUE PENSA QUE ESTA FAZENDO ANDANDO COM ESSA ARMADURA PRÁ CA E PRA LÁ, VOCÊ SEQUER SABE A SITUAÇAO DESSA CIDADE?
+npc 1: você quer saber sobre a situação da cidade? AHRR! tenho certeza que a [npc 2] abriu a boca.
+
+fase 2:
